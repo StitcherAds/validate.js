@@ -2,6 +2,12 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     jshint: {
+      options: {
+        esversion: 6,
+        laxcomma: true,
+        curly: true,
+        asi: true // Allow missing semicolons
+      },
       gruntfile: {
         src: 'Gruntfile.js'
       },
@@ -10,14 +16,18 @@ module.exports = function(grunt) {
         options: {
           ignores: ['specs/vendor/**/*.js'],
           laxcomma: true,
-          curly: true
+          curly: true,
+          esversion: 6,
+          asi: true // Allow missing semicolons in specs
         }
       },
       validate: {
         src: '<%= pkg.name %>',
         options: {
           laxcomma: true,
-          curly: true
+          curly: true,
+          esversion: 6,
+          asi: true // Allow missing semicolons in validate files
         }
       }
     },
@@ -70,27 +80,16 @@ module.exports = function(grunt) {
           specs: "<%= jasmine.specs.options.specs %>",
           helpers: "<%= jasmine.specs.options.helpers %>",
           display: "none",
-          template: require('grunt-template-jasmine-istanbul'),
-          templateOptions: {
-            coverage: 'coverage.json',
-            report: [{
-              type: 'text-summary'
-            }, {
-              type: 'lcovonly'
-            }, {
-              type: 'html',
-              options: {
-                dir: 'coverage'
-              }
-            }]
-          }
         }
       }
     },
-    docco: {
-      src: "<%= pkg.name %>",
-      options: {
-        output: 'docs'
+    jsdoc: {
+      dist: {
+        src: ['<%= pkg.name %>', 'README.md'],
+        options: {
+          destination: 'docs',
+          template: "node_modules/jsdoc/templates/default"
+        }
       }
     },
     uglify: {
@@ -118,10 +117,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-docco');
+  grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-notify');
 
   grunt.registerTask('default', 'watch');
-  grunt.registerTask('build', ['jshint:validate', 'jasmine:specs', 'uglify', 'docco']);
+  grunt.registerTask('build', ['jshint:validate', 'jasmine:specs', 'uglify', 'jsdoc']);
   grunt.registerTask('test', ['jshint', 'jasmine']);
 };

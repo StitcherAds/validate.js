@@ -824,101 +824,65 @@
     numericality: function(value, options, attribute, attributes, globalOptions) {
       // Empty values are fine
       if (!v.isDefined(value)) {
-        return;
+        return
       }
-
-      options = v.extend({}, this.options, options);
-
+    
+      options = v.extend({}, this.options, options)
+    
       var errors = []
-        , name
-        , count
-        , checks = {
-            greaterThan:          function(v, c) { return v > c; },
-            greaterThanOrEqualTo: function(v, c) { return v >= c; },
-            equalTo:              function(v, c) { return v === c; },
-            lessThan:             function(v, c) { return v < c; },
-            lessThanOrEqualTo:    function(v, c) { return v <= c; },
-            divisibleBy:          function(v, c) { return v % c === 0; }
-          }
-        , prettify = options.prettify ||
-          (globalOptions && globalOptions.prettify) ||
-          v.prettify;
-
+      var name, count
+      var checks = {
+        greaterThan: function(v, c) { return v > c },
+        greaterThanOrEqualTo: function(v, c) { return v >= c },
+        equalTo: function(v, c) { return v === c },
+        lessThan: function(v, c) { return v < c },
+        lessThanOrEqualTo: function(v, c) { return v <= c },
+        divisibleBy: function(v, c) { return v % c === 0 }
+      }
+      var prettify = options.prettify || (globalOptions && globalOptions.prettify) || v.prettify
+    
       // Strict will check that it is a valid looking number
       if (v.isString(value) && options.strict) {
-        var pattern = "^-?(0|[1-9]\\d*)";
-        if (!options.onlyInteger) {
-          pattern += "(\\.\\d+)?";
-        }
-        pattern += "$";
-
-        if (!(new RegExp(pattern).test(value))) {
-          return options.message ||
-            options.notValid ||
-            this.notValid ||
-            this.message ||
-            "must be a valid number";
+        var pattern = options.onlyInteger ? /^-?(0|[1-9]\d*)$/ : /^-?(0|[1-9]\d*)(\.\d+)?$/
+        if (!pattern.test(value)) {
+          return options.message || options.notValid || this.notValid || this.message || "must be a valid number"
         }
       }
-
+    
       // Coerce the value to a number unless we're being strict.
       if (options.noStrings !== true && v.isString(value) && !v.isEmpty(value)) {
-        value = +value;
+        value = +value
       }
-
+    
       // If it's not a number we shouldn't continue since it will compare it.
       if (!v.isNumber(value)) {
-        return options.message ||
-          options.notValid ||
-          this.notValid ||
-          this.message ||
-          "is not a number";
+        return options.message || options.notValid || this.notValid || this.message || "is not a number"
       }
-
+    
       // Same logic as above, sort of. Don't bother with comparisons if this
       // doesn't pass.
       if (options.onlyInteger && !v.isInteger(value)) {
-        return options.message ||
-          options.notInteger ||
-          this.notInteger ||
-          this.message ||
-          "must be an integer";
+        return options.message || options.notInteger || this.notInteger || this.message || "must be an integer"
       }
-
+    
       for (name in checks) {
-        count = options[name];
+        count = options[name]
         if (v.isNumber(count) && !checks[name](value, count)) {
-          // This picks the default message if specified
-          // For example the greaterThan check uses the message from
-          // this.notGreaterThan so we capitalize the name and prepend "not"
-          var key = "not" + v.capitalize(name);
-          var msg = options[key] ||
-            this[key] ||
-            this.message ||
-            "must be %{type} %{count}";
-
-          errors.push(v.format(msg, {
-            count: count,
-            type: prettify(name)
-          }));
+          var key = "not" + v.capitalize(name)
+          var msg = options[key] || this[key] || this.message || "must be %{type} %{count}"
+          errors.push(v.format(msg, { count: count, type: prettify(name) }))
         }
       }
-
+    
       if (options.odd && value % 2 !== 1) {
-        errors.push(options.notOdd ||
-            this.notOdd ||
-            this.message ||
-            "must be odd");
+        errors.push(options.notOdd || this.notOdd || this.message || "must be odd")
       }
       if (options.even && value % 2 !== 0) {
-        errors.push(options.notEven ||
-            this.notEven ||
-            this.message ||
-            "must be even");
+        errors.push(options.notEven || this.notEven || this.message || "must be even")
       }
-
+    
       if (errors.length) {
-        return options.message || errors;
+        return options.message || errors
       }
     },
     datetime: v.extend(function(value, options) {
@@ -1048,20 +1012,23 @@
       return v.format(message, {value: value});
     },
     email: v.extend(function(value, options) {
-      options = v.extend({}, this.options, options);
-      var message = options.message || this.message || "is not a valid email";
+      options = v.extend({}, this.options, options)
+      var message = options.message || this.message || "is not a valid email"
+    
       // Empty values are fine
       if (!v.isDefined(value)) {
-        return;
+        return
       }
+    
       if (!v.isString(value)) {
-        return message;
+        return message
       }
-      if (!this.PATTERN.exec(value)) {
-        return message;
+    
+      if (!this.PATTERN.test(value)) {
+        return message
       }
     }, {
-      PATTERN: /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/i
+      PATTERN: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}$/i
     }),
     equality: function(value, options, attribute, attributes, globalOptions) {
       if (!v.isDefined(value)) {
@@ -1094,76 +1061,33 @@
     },
     // A URL validator that is used to validate URLs with the ability to
     // restrict schemes and some domains.
-    url: function(value, options) {
+    url: function (value, options) {
       if (!v.isDefined(value)) {
-        return;
+        return
       }
 
-      options = v.extend({}, this.options, options);
+      options = v.extend({}, this.options, options)
 
-      var message = options.message || this.message || "is not a valid url"
-        , schemes = options.schemes || this.schemes || ['http', 'https']
-        , allowLocal = options.allowLocal || this.allowLocal || false
-        , allowDataUrl = options.allowDataUrl || this.allowDataUrl || false;
+      var message = options.message || this.message || "is not a valid url",
+        schemes = options.schemes || this.schemes || ['http', 'https'],
+        allowLocal = options.allowLocal || this.allowLocal || false,
+        allowDataUrl = options.allowDataUrl || this.allowDataUrl || false
+
       if (!v.isString(value)) {
-        return message;
+        return message
       }
 
-      // https://gist.github.com/dperini/729294
-      var regex =
-        "^" +
-        // protocol identifier
-        "(?:(?:" + schemes.join("|") + ")://)" +
-        // user:pass authentication
-        "(?:\\S+(?::\\S*)?@)?" +
-        "(?:";
-
-      var tld = "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))";
-
-      if (allowLocal) {
-        tld += "?";
-      } else {
-        regex +=
-          // IP address exclusion
-          // private & local networks
-          "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +
-          "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +
-          "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})";
-      }
-
-      regex +=
-          // IP address dotted notation octets
-          // excludes loopback network 0.0.0.0
-          // excludes reserved space >= 224.0.0.0
-          // excludes network & broacast addresses
-          // (first & last IP address of each class)
-          "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
-          "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
-          "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
-        "|" +
-          // host name
-          "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
-          // domain name
-          "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
-          tld +
-        ")" +
-        // port number
-        "(?::\\d{2,5})?" +
-        // resource path
-        "(?:[/?#]\\S*)?" +
-      "$";
+      var regex = "^" + "(?:(?:" + schemes.join("|") + ")://)" + "(?:\\S+(?::\\S*)?@)?" + "(?:" + (allowLocal ? "(?:localhost|(?:\\d{1,3}\\.){3}\\d{1,3}|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?))(?::\\d{2,5})?" : "(?!(?:0|10|127|169\\.254|192\\.168|224|172\\.(?:1[6-9]|2\\d|3[0-1]))\\.)" + "(?:\\d{1,3}\\.){3}\\d{1,3}") + "|" + "(?:[a-z\\u00a1-\\uffff0-9](?:[a-z\\u00a1-\\uffff0-9-]*[a-z\\u00a1-\\uffff0-9])*)" + "(?:\\.(?:[a-z\\u00a1-\\uffff0-9](?:[a-z\\u00a1-\\uffff0-9-]*[a-z\\u00a1-\\uffff0-9])*))*" + "(?:\\.[a-z\\u00a1-\\uffff]{2,})" + ")" + "(?::\\d{2,5})?" + "(?:[/?#]\\S*)?" + "$"
 
       if (allowDataUrl) {
-        // RFC 2397
-        var mediaType = "\\w+\\/[-+.\\w]+(?:;[\\w=]+)*";
-        var urlchar = "[A-Za-z0-9-_.!~\\*'();\\/?:@&=+$,%]*";
-        var dataurl = "data:(?:"+mediaType+")?(?:;base64)?,"+urlchar;
-        regex = "(?:"+regex+")|(?:^"+dataurl+"$)";
+        var dataurl = "^data:(?:[a-z]+/[a-z0-9-+.]+)?(?:;[a-z-]+=[a-z0-9-]+)*(?:;base64)?,[a-z0-9!$&'()*+,;=:@%]*$"
+        regex = "(?:" + regex + ")|(?:" + dataurl + ")"
       }
 
-      var PATTERN = new RegExp(regex, 'i');
-      if (!PATTERN.exec(value)) {
-        return message;
+      var PATTERN = new RegExp(regex, 'i')
+
+      if (!PATTERN.test(value)) {
+        return message
       }
     },
     type: v.extend(function(value, originalOptions, attribute, attributes, globalOptions) {
