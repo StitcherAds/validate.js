@@ -1,6 +1,6 @@
 {
   "name": "@stitcherads/validate.js",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "author": "Nicklas Ansman <nicklas@ansman.se>",
   "description": "Declarative validations for JavaScript",
   "main": "validate.js",
