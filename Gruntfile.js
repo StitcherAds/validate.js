@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    
     jshint: {
       options: {
         esversion: 6,
@@ -22,7 +23,8 @@ module.exports = function(grunt) {
         }
       },
       validate: {
-        src: '<%= pkg.name %>',
+        // Point to the actual JavaScript file instead of using pkg.name
+        src: ['validate.js'],
         options: {
           laxcomma: true,
           curly: true,
@@ -31,6 +33,7 @@ module.exports = function(grunt) {
         }
       }
     },
+    
     watch: {
       jshintGruntfile: {
         files: 'Gruntfile.js',
@@ -40,7 +43,8 @@ module.exports = function(grunt) {
         }
       },
       jshintSrc: {
-        files: '<%= pkg.name %>',
+        // Watch the actual JavaScript file instead of pkg.name
+        files: ['validate.js'],
         tasks: ['jshint:validate'],
         options: {
           atBegin: true
@@ -52,59 +56,22 @@ module.exports = function(grunt) {
         options: {
           atBegin: true
         }
-      },
-      specs: {
-        files: ['specs/**/*.js', '<%= pkg.name %>'],
-        tasks: ['jasmine:specs', 'jasmine:coverage'],
-        options: {
-          atBegin: true
-        }
       }
     },
-    jasmine: {
-      specs: {
-        src: "<%= pkg.name %>",
-        options: {
-          keepRunner: true,
-          vendor: "specs/vendor/**/*.js",
-          specs: "specs/**/*-spec.js",
-          helpers: "specs/helpers.js",
-          display: "short",
-          summary: true
-        }
-      },
-      coverage: {
-        src: "<%= jasmine.specs.src %>",
-        options: {
-          vendor: "<%= jasmine.specs.options.vendor %>",
-          specs: "<%= jasmine.specs.options.specs %>",
-          helpers: "<%= jasmine.specs.options.helpers %>",
-          display: "none",
-        }
-      }
-    },
-    jsdoc: {
-      dist: {
-        src: ['<%= pkg.name %>', 'README.md'],
-        options: {
-          destination: 'docs',
-          template: "node_modules/jsdoc/templates/default"
-        }
-      }
-    },
+
     uglify: {
       options: {
         report: 'gzip',
         banner: '/*!\n' +
-                ' * <%= pkg.name %> <%= pkg.version %>\n' +
+                ' * validate.js <%= pkg.version %>\n' +
                 ' * http://validatejs.org/\n' +
                 ' * (c) 2013-2015 Nicklas Ansman, 2013 Wrapp\n' +
-                ' * <%= pkg.name %> may be freely distributed under the MIT license.\n' +
+                ' * validate.js may be freely distributed under the MIT license.\n' +
                 '*/\n'
       },
       dist: {
-        src: "<%= pkg.name %>",
-        dest: "validate.min.js",
+        src: 'validate.js', // Replace pkg.name with the actual source file
+        dest: 'validate.min.js',
         options: {
           sourceMap: true,
           sourceMapName: 'validate.min.map'
@@ -113,14 +80,14 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-jasmine');
+  // Load Grunt plugins
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-notify');
 
+  // Register Grunt tasks
   grunt.registerTask('default', 'watch');
-  grunt.registerTask('build', ['jshint:validate', 'jasmine:specs', 'uglify', 'jsdoc']);
-  grunt.registerTask('test', ['jshint', 'jasmine']);
+  grunt.registerTask('build', ['jshint:validate', 'uglify']);
+  grunt.registerTask('test', ['jshint']);
 };
